@@ -761,15 +761,12 @@ Dependiendo de donde nos interese podemos aplicar esta configuración en:
 
 Después de aplicar esa `Options` si queremos acceder a una carpeta que no contiene ningún `index.html` nos dará un aviso de permisos y no se muestra el contenido:
 
-![](images/hard25.png)
-
 
 
 __Revisar permisos en archivos sensibles__
 
 Por defecto, en el archivo de configuración de `Apache`  tienen permiso de lectura todos los usuarios:
 
-![](images/hard26.png)
  
 Cambiamos los permisos por quitando los permisos de lectura del grupo `Otros`:
 
@@ -931,42 +928,15 @@ A diferencia de un firewall tradicional (que bloquea tráfico a nivel de red o s
 
 A continuación puedes probar alguno de los ataques. Los tienes enlazados al repositorio donde puedes encontrar información sobre explotación y mitigación y la forma de probarlos. Si has realizado las actividades correspondientes, deberías de tener los diferentes archivos.
 
-- [Inyección SQL](https://github.com/jmmedinac03vjp/PPS-Unidad3Actividad4-InyeccionSQL). 
-
-Accede a la página: <http://localhost/SQLi/login1.php> 
-
-Introduce  en el campo de usuario o contraseña el siguiente código:
-
-```
-' OR '1'='1' -- -
-```
-
-![](images/hard30.png)
-
-
-Aparecerán los usuarios y contraseñas almacenados en el sistema.
-- [Cross-Site Scripting (XSS)]
-
-Accede a la página: <http://localhost/SQLi/login1.php> 
-
-Introduce  en el campo de usuario o contraseña el siguiente código:
-
-```
-<script>alert('XSS ejecutado!')</script>
-```
-
-![](images/hard29.png)
-
-
 - [Path Traversal](https://github.com/jmmedinac03vjp/PPS-Unidad3Actividad8-LFI)
 
 Accede a la página <http://localhost/LFI/lfi.php?file=../../../../etc/passwd>
 
-![](images/hard28.png)
+![](Images/img27.png)
 
 
 
-🛡 __¿Cómo funciona?__
+__¿Cómo funciona?__
 
 El WAF inspecciona cada solicitud y respuesta HTTP:
 
@@ -999,7 +969,6 @@ Para asegurarnos que no tenemos ninguna seguridad implementada de las realizadas
 - Archivo de configuración del sitio virtual `Apache`. [/etc/apache2/sites-available/000-default.conf.](files/000-default.conf)
 
 
-
 ### Instalar `mod_security`
 
 Para instalar la libreria de Apache `ModSecurity` ejecuta en línea de comandos:
@@ -1027,8 +996,7 @@ Asegúrate de que esté en modo "detección" primero (fase de pruebas):
 SecRuleEngine DetectionOnly
 ```
 
-![](images/hard31.png)
-
+![image](https://github.com/user-attachments/assets/644453f2-4d32-4620-b36c-3c21f6c9bb8f)
 
 > Más adelante puedes cambiar a `On` para bloquear tráfico malicioso real.
 
@@ -1045,7 +1013,7 @@ apachectl -M | grep security
 ```
 Nos debe de dar como resultado: ` security2_module (shared)`
 
-![](images/hard32.png)
+![](Images/img34.png)
 
 ---
 
@@ -1077,7 +1045,7 @@ apache2ctl -t -D DUMP_INCLUDES|grep modsecurity
 ```
 Si nos muestran diferentes módulos de reglas, están habilitados y no es necesario crear un archivo como security-crs.conf a menos que quieras una configuración personalizada o usas otra ubicación.
 
-![](images/hard33.png)
+![](Images/img36.png)
 
 En el caso de que no te aparezcan cargados los módulos, edita el archivo de configuración de Apache para que cargue las reglas. Puedes hacer esto en un archivo `.conf` dentro de `/etc/apache2/conf-available/`:
 
@@ -1138,8 +1106,7 @@ El acceso debería ser bloqueado con un __Forbidden__ (si está en modo "On") o 
 
 ---
 
-
-![](images/hard34.png)
+![](Images/img37.png)
 
 ---
 
@@ -1150,122 +1117,10 @@ ModSecurity escribe sus logs `/var/log/apache2/modsec_autdit.log`.
 Así si hemos intentado hacer el ataque XSS anteriormente, podremos encontrar información de él:
 
 ```bash
-cat /var/log/apache2/modsec_audit.log
+cat /var/log/apache2/error.log
 ```
 
-![](images/hard35.png)
-
-También puede usar el `error.log` de Apache para errores graves.
-
----
-
-
-### 🛠️ Consejo: desactivar reglas específicas
-
-Si alguna regla legítimamente interfiere con tu aplicación, puedes desactivarla selectivamente:
-
-```apache
-SecRuleRemoveById 942100
-```
-
-Coloca esto en tu configuración personalizada, después de cargar el CRS.
-
----
- 
-## 11.IMPORTANTE SOLUCION  de problemas que puedan surgir.
-
-Como estamos utilizando un servidor con docker-compose es importante:
-
-__Para Parar el Escenario LAMP__
-
-- Utilizamos siempre:
-
-```bash
-docker-compose stop
-```
-
-Si utilizáramos `docker-compose` o `docker-compose down -v`, van a eliminarse la red y las máquinas, y en caso de que pongamos `-v`también los volúmenes docker.
-
-No obstante, recordemos que dentro de la carpeta del docker compose, tenemos `volúmenes bind-mount de docker` donde se va guardando: 
-
-- `config` : configuración de Apache y mysql.
-
-- `logs`: logs de apache.
-
-- `www`: `/var/www/html` de apache.
-
-- `data`: base de datos mysql.
-
-Por lo tanto, después de eliminar el escenario, incluso si utilizamos `-v` esos archivos seguirán estando en nuestro sistema, por lo tanto ¡¡¡OJO¡¡¡ por que nos pueden dar problemas al crear de nuevo el escenario.
-
-
-__Para Iniciar el Escenario LAMP__
-
-- Utilizamos siempre:
-
-```bash
-docker-compose stop
-```
-
-__ Para eliminar completamente el escenario y comenzar de nuevo eliminando las configuraciones anteriores__
-
-- Utilizamos :
-
-```bash
-docker-compose down -v
-```
-
-
-Recordemos que dentro podemos tener configuraciones en los `volúmenes bind mount` por lo tanto hay que ver que puede ser necesario eliminar también archivos y configuraciones anteriores en las siguientes carpetas:
-
-- `config` : configuración de Apache y mysql.
-
-	- `initdb`: configuración de mysql
-
-	- `php`: configuración PHP de Apache. Si hemos modificado algo, sería conveniente eliminar el php.ini para que se genere de nuevo por defecto.
-
-	- `ssl`: carpeta con certificados `SSL` de Apache. Es posible que tengamos que eliminarlos.
-
-	- `vhosts` __IMPORTANTE__: aquí se guarda la configuración de los sitios virtuales de apache `/etc/apache2/sites-available`. Por lo tanto cualquier archivo de configuración que esté presente aquí el servidor va a intentar arrancarlo y si no tiene algún módulo activado es posible que nos de error.
- 
-- `logs`: logs de apache. En principio esta carpeta no es problemática.
-
-- `www`: `/var/www/html` de apache. Nuestros archivos del servidor. No debe de dar problema tampoco.
-
-- `data`: base de datos mysql. Si queremos eliminar BBDD deberíamos eliminar su contenido.
-
-Por lo tanto si hemos eliminado completamente el escenario, cuando lo arranquemos de nuevo, hay que comprobar que todos los servicios están levantados y especialmente que sitios están activados por ejemplo con `a2ensite` y en su caso desactivar los sitios no deseados.
-
-__¡¡¡OJO¡¡¡__ que el fichero que sí se elimina es `/etc/hosts` por lo que tenemos que volver a poner allí la línea
-
-archivo `/etc/hosts`
-```/etc/hosts
-127.0.0.1       pps.ceceti www.pps.ceceti
-
-```
-
-__EJEMPLO DE PROBLEMA:__ Después de eliminar el escenario multicontenedor no arranca el servidor PHP.
-
-Si hemos eliminado el escenario multicontenedor y después de levantarlo no podemos acceder al servidor apache con: `docker exec -it lamp-php83 /bin/bash`, es posible por que haya un problema en la configuración. Por ejemplo en este caso:
-
-- Hemos estado practicando y hemos activado SSL, por lo que tenemos archivo default-ssl.conf para levantar apache con SSL.
-
-- Lógicamente hemos activado el módulo ssl `a2enmod ssl`
-
-- Al eliminar el contenedor e intentar levantarlo de nuevo, va a intentar activar el sitio `default-ssl.conf` pero como no tiene activo el módulo  `ssl` apache da un error y no lo levanta.
-
-Podemos ver el estado de los contenedores con `docker-compose ps`.
-
- __Que hacer en este caso__ 
-
-Podemos mover esos archivos de configuración a otro sitio, levantar el escenario o apache de nuevo y volver a restaurar el archivo a su sitio después de levantar el módulo SSL y si queremos desactivamos el sitio por defecto `a2dissite 000-default.conf`.
-
-![](images/hard14.png)
+![](Images/img38.png)
 
 
 > Ángel Pérez Blanco
-
-
-
-
-
