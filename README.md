@@ -70,14 +70,12 @@ En el directorio `/etc/apache2/mods-enabled` están los módulos que tenemos ins
 
 Podemos ver los módulos que tenemos instalados con el comando `apache2ctl -t -D DUMP_MODULES`.
 
-![](images/hard1.png)
-
 
 Para añadir la funcionalidad de un módulo a nuestro servidor Apache, utilizamos `a2enmod nombre_modulo`(a2enmod:Apache2 enable module). Por ejemplo para habilitar el módulo ssl utilizaríamos `a2enmod ssl`.
 
 Para deshabilitar la funcionalidad de un módulo lo desinstalamos con `a2dismod nombre_modulo`(a2dismod: Apache2 disable module).
 
-Al igual que con los **módulos** tenemos dos directorios con los archivos de configuración de los **Sitios** o **Servidores Web** que tenemos: 
+Al igual que con los __módulos__ tenemos dos directorios con los archivos de configuración de los __Sitios__ o __Servidores Web__ que tenemos: 
 
 - En `/etc/apache2/sites-available` tenemos los archivos de configuración de los diferentes sitios o Servidores web disponibles, independientemente de que se hayan habilitado o no.
 
@@ -87,7 +85,6 @@ Para habilitar un sitio utilizamos el comando `a2ensite Archivo.conf`. Siendo Ar
 
 Cuando habilitamos un directorio con `a2ensite`(Apache2 enable site), se crea un enlace que apunta al archivo de configuración situado en `/etc/apache2/sites-available`.
 
-![](images/hard2.png)
 
 ---
 
@@ -96,10 +93,10 @@ Cuando habilitamos un directorio con `a2ensite`(Apache2 enable site), se crea un
 Para crear un sitio virtual, como podemos intuir, creamos un archivo o modificamos alguno de los archivos existentes en  `/etc/apache2/sites-available`.
 
 Vamos a modificar el  archivo`/etc/apache2/sites-available/000-default.conf`. Lo dejamos con este contenido:
-~~~
+```
 <VirtualHost *:80>
 
-        ServerName www.pps.edu
+        ServerName www.pps.ceceti
 	ServerAdmin webmaster@localhost
         DocumentRoot /var/www/html
 
@@ -108,26 +105,26 @@ Vamos a modificar el  archivo`/etc/apache2/sites-available/000-default.conf`. Lo
 
 </VirtualHost>
 
-~~~
+```
 
 Donde podemos ver que encontramos las diferentes variable:
 
-- **ServerName** va a almacenar el nombre de nuestro `host virtual`o `servidor virtual`. Observa que el nombre de nuestro sitio es www.pps.edu.
+- __ServerName__ va a almacenar el nombre de nuestro `host virtual`o `servidor virtual`. Observa que el nombre de nuestro sitio es www.pps.ceceti.
 
-- En **ServerAdmin** ponemos el correo electrónico del administrador.
+- En __ServerAdmin__ ponemos el correo electrónico del administrador.
 
-- **DocumentRoot** contiene el directorio donde van a estar ubicados los archivos a mostrar en dicho servidor (html, php, etc...)
+- __DocumentRoot__ contiene el directorio donde van a estar ubicados los archivos a mostrar en dicho servidor (html, php, etc...)
 
 - Aun que no obligatorio, vemos que  En `ErrorLog` y `CustomLog`podemos indicarles los directorios donde se almacenarán los logs. En este caso van en combinación con la variable de docker `${APACHE_LOG_DIR)` que en nuestro servidor es `/var/log/apache2`.
 
 
 Una vez creado el archivo de configuración del sitio, lo habilitamos con:
 
-~~~
+```
 a2ensite /etc/apache2/sites-available/000-default.conf
-~~~
+```
 
-**Permisos y propietarios de Directorios de sitios virtuales**
+__Permisos y propietarios de Directorios de sitios virtuales__
 
 Es muy importante establecer los permisos de los directorios correctamente o puedes encontrarte un error de que no se puede acceder a los archivos del directorio virtual.ç
 
@@ -135,14 +132,14 @@ Cuando un cliente hace una petición a un recurso de nuestro servidor lo hace co
 
 Por lo tanto, suponiendo que no necesitemos subir archivos a nuestro servidor web, para establecer los propietarios y permisos oportunos a los archivos virtuales de nuestro sitio que se encuentran en `/var/www/html` hacemos:
 
-~~~
+```
 chown -R www-data:www-data /var/www/html/*
 chmod -R 755 /var/www/html/*
-~~~
+```
 
 ---
 
-## 4. Resolución local de nombres: dns o fichero **/etc/hosts**
+## 4. Resolución local de nombres: dns o fichero __/etc/hosts__
 
 Nuestro navegador resuleve la dirección www.google.com o cualquier otra asociándole la ip donde se encuentra en el servidor, eso es debido a la resolución de servidores dns.
 
@@ -152,65 +149,58 @@ Debemos editar el fichero hosts para que nos devuelva la dirección del bucle lo
 
 Este fichero está en /etc/hosts.
 
-En los casos asociamos los nombres de los host virtuales a localhost tal y como se muestra en la imagen.
+En los casos asociamos los nombres de los host virtuales a localhost tal y como se muestra en las siguientes capturas, además en el archivo `/etc/hosts` vemos cómo dirección de nuestro servidor apache. En nuestro caso `172.20.0.5`:
 
-![](images/hard3.png)
+Máquina host:
 
-Además en el archivo `/etc/hosts` vemos cómo dirección de nuestro servidor apache. En nuestro caso `172.20.0.5`
+![](Images/img1.png)
 
-No obstante puedes consultarlo en docker con el comando: 
+Contenedor docker: 
 
-~~~
-docker inspect lamp-php83 |grep IPAddress
-~~~ 
-
-Si queremos acceder a este servidor virtual desde otros equipos de la red, o si estamos utilizando docker y queremos acceder a ellos desde nuestro navegador, tenemos que añadir en el /etc/hosts una linea que vincule la dirección ip con el nombre del servidor:
-
-![](images/hard4.png)
+![](Images/img2.png)
 
 
-
-**Reiniciar el servicio Apache**
+__Reiniciar el servicio Apache__
 
 Después de hacer cambios en la configuración de nuestro servidor, si queremos que estos cambios se apliquen, necesitamos recargar la configuración con:
 
-~~~
+```
 service apache2 reload
-~~~
+```
 
 Ya podemos acceder a nuestro servidor desde:
 
-~~~
-http://www.pps.edu/
-~~~
+```
+http://www.pps.ceceti/
+```
 
-![](images/hard5.png)
+![](Images/img3.png)
 
 ---
 
-## 5. Creación de un servidor virtual **Hackker**
+## 5. Creación de un servidor virtual __Hackker__
 
-Vamos a crear un servidor virtual nuevo para alojar los archivos maliciosos. El directorio estará en `/var/www/hacker` y el nombre del servidor será `www.hacker.edu`
+Vamos a crear un servidor virtual nuevo para alojar los archivos maliciosos. El directorio estará en `/var/www/hacker` y el nombre del servidor será `www.hacker.ceceti`
 
 Dentro de este directorio crear una página básica index.html. Puedes descargarte [éste.](./files/index.html)
 
 Creamos directorio, copiamos el archivo y establecemos permisos y propietarios. Finalmente habilitamos sitio y recargamos servicio:
 
-~~~
+```
 mkdir /var/www/hacker 
 cp /var/www/html/index.html /var/www/hacker/index.html
 chown -R www-data:www-data /var/www/hacker
 chmod -R 755 /var/www/hacker
 a2ensite /etc/apache2/sites-available/hacker.conf
 service apache2 reload
-~~~
+```
 
 Finalmente creamos el archivo de configuración del sitio:
 
-~~~
+```
 <VirtualHost *:80>
 
-    ServerName www.hacker.edu
+    ServerName www.hacker.ceceti
 
     ServerAdmin webmaster@localhost
     DocumentRoot /var/www/hacker
@@ -220,11 +210,11 @@ Finalmente creamos el archivo de configuración del sitio:
 
 </VirtualHost>
 
-~~~
+```
 
-Accedemos desde `http://www.hacker.edu`
+Accedemos desde `http://www.hacker.ceceti`
 
-![](images/hard6.png)
+![](Images/img5.png)
 
 
 ---
@@ -234,31 +224,31 @@ Accedemos desde `http://www.hacker.edu`
 Para proteger nuestro servidor es crucial habilitar HTTPS en el servidor local. Veamos cómo podemos habilitarlo en Apache con dos métodos diferentes.
 
 
-### Método 1: Habilitar HTTPS en Apache con **OpenSSL**
+### Método 1: Habilitar HTTPS en Apache con __OpenSSL__
 
 1. Generamos un certificado SSL autofirmado
 
-Para entornos de prueba o desarrollo, se puede utilizar un **certificado autofirmado**, es decir, un certificado que no ha sido emitido por una entidad de certificación.
+Para entornos de prueba o desarrollo, se puede utilizar un __certificado autofirmado__, es decir, un certificado que no ha sido emitido por una entidad de certificación.
 
 
-**Paso 1: Crear la clave privada y el certificado**
+__Paso 1: Crear la clave privada y el certificado__
 ---
 
 Como estamos trabajando bajo docker, accedemos al servidor:
 
-~~~
+```
 docker exec -it lamp-php83 /bin/bash
-~~~
+```
 
 Comprobamos que están creados los directorios donde se guardan los certificados y creamos el certificado autofirmado:
 
-~~~
+```
 mkdir /etc/apache2/ssl
 cd /etc/apache2/ssl
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout localhost.key -out localhost.crt
-~~~
+```
 
-**Explicación de los parámetros del comando:**
+__Parámetros del comando__
 
 - `req`: inicia la generación de una solicitud de certificado.
 - `-x509`: crea un certificado autofirmado en lugar de una CSR.
@@ -270,14 +260,11 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout localhost.key -out l
 
 Durante la ejecución del comando, se te solicitará que completes datos como país, nombre de organización, y nombre común (dominio).
 
-![](images/hard7.png)
-
 Vemos como se han creado el certificado y la clave pública
 
-![](images/hard8.png)
+![](Images/img4.png)
 
-
-**Paso 2.Configurar Apache para usar HTTPS**
+__Paso 2.Configurar Apache para usar HTTPS__
 ---
 
 Una vez que tengas el certificado y la clave privada, debes configurar Apache para utilizarlos.
@@ -286,23 +273,23 @@ Yo voy a cambiar el archivo de coniguración que uso. Por lo tanto:
 
 - Deshabilitar el sitio que estaba utilizando:
 
-```bash
+```
 a2dissite 000-default.conf
 ```
 
-.
+
 Editar el archivo de configuración de Apache `default-ssl.conf`:
 
-~~~
+```
 nano /etc/apache2/sites-available/default-ssl.conf
-~~~
+```
 
 Lo modificamos y dejamos así:
 
-~~~
+```
 <VirtualHost *:80>
 
-    ServerName www.pps.edu
+    ServerName www.pps.ceceti
 
     ServerAdmin webmaster@localhost
     DocumentRoot /var/www/html
@@ -313,7 +300,7 @@ Lo modificamos y dejamos así:
 </VirtualHost>
 
 <VirtualHost *:443>
-    ServerName www.pps.edu
+    ServerName www.pps.ceceti
 
    //activar uso del motor de protocolo SSL 
     SSLEngine on
@@ -322,35 +309,40 @@ Lo modificamos y dejamos así:
 
     DocumentRoot /var/www/html
 </VirtualHost>
-~~~
+```
 
-Date cuenta que hemos creado un **servidor virtual** con nombre **www.pps.edu**. A partir de ahora tendremos que introducir en la barra de dirección del navegador `https://www.pps.edu` en vez de `https://localhost`.
+![](Images/img6.png)
+![](Images/img6_1.png)
+
+Date cuenta que hemos creado un __servidor virtual__ con nombre __www.pps.ceceti__. A partir de ahora tendremos que introducir en la barra de dirección del navegador `https://www.pps.ceceti` en vez de `https://localhost`.
 
 
-**Paso3: Habilitar SSL y el sitio:**
+__Paso3: Habilitar SSL y el sitio:__
 ---
 
-En el servidor Apache, activamos **SSL** mediante la habilitación de la configuración `default-ssl.conf`que hemos creado:
+En el servidor Apache, activamos __SSL__ mediante la habilitación de la configuración `default-ssl.conf`que hemos creado:
 
-~~~
+```
 a2enmod ssl
 a2ensite default-ssl.conf
 service apache2 reload
-~~~
+```
+
+![](Images/img7.png)
 
 
-**Paso 4: poner dirección en /etc/hosts o habilitar puerto 443**
+__Paso 4: poner dirección en /etc/hosts o habilitar puerto 443__
 
-Añadimos nuestro dominio en el archivo /etc/hosts de nuestra máquina anfitriona para que resulva bien los dns. [Lo tienes explicado en una sección anterior(## Resolución_de_ nombres:_dns_o_fichero_**/etc/hosts**)
+Añadimos nuestro dominio en el archivo /etc/hosts de nuestra máquina anfitriona para que resulva bien los dns. [Lo tienes explicado en una sección anterior(## Resolución_de_ nombres:_dns_o_fichero___/etc/hosts__)
 
-Ahora el servidor soportaría **HTTPS**. Accedemos al servidor en la siguiente dirección: `https://www.pps.edu`
+Ahora el servidor soportaría __HTTPS__. Accedemos al servidor en la siguiente dirección: `https://www.pps.ceceti`
 
 
-### Método 2: Obtener Certificado en un servidor Linux usando Let's Encrypt y Certbot**
+### Método 2: Obtener Certificado en un servidor Linux usando Let's Encrypt y Certbot__
 
 El objetivo de [Let’s Encrypt[(https://letsencrypt.org/es/how-it-works/) y el protocolo ACME es hacer posible configurar un servidor HTTPS y permitir que este genere automáticamente un certificado válido para navegadores, sin ninguna intervención humana. Esto se logra ejecutando un agente de administración de certificados en el servidor web.
 
-✅ Requisitos previos
+#### Requisitos previos
 
 Antes de empezar, debemos asegurarnos que:
 
@@ -364,7 +356,7 @@ Hasta ahora hemos hecho todos los ejercicios en nuestro servidor local `localhos
 
 Podemos obtener un dominio gratuito en webs como `duckdns.org` o `no-ip.org`. Vamos a crear uno
 
-**📥 Paso 1: Registrar un dominio a nuestro nombre**.
+__Paso 1: Registrar un dominio a nuestro nombre__.
 
 Normalmente es necesario adquirir un dominio para nuestra organización. Si embargo podemos obtener un dominio y asociarlo a una IP dinámica de forma gratuita.
 
@@ -375,38 +367,44 @@ En esta ocasión he elegido [Duck DNS](https://www.duckdns.org/).
 - Introducimos el nombre de dominio que queremos y comprobamos que está disponible. Lógicamente, nuestro nombre de dominio será un subdominio de Duck DNS. En mi caso he generado `ppsiesvalledeljerteplasencia.duckdns.org`. Además la asociará con la dirección ip que detecta en ese momento. 
 
 
-![](images/hard11.png)
+![](Images/img8.png)
+
+![](Images/img8_1.png)
+
 
 - Ahora que tenemos un nombre de dominio registrado, debemos modificar el `ServerName` del fichero de configuración de nuestro host virtual `/etc/apache2/sites-available/default-ssl.conf` o el fichero de configuración del host virtual que deseemos.
 
-![](images/hard13.png)
+![](Images/img9.png)
 
+![](Images/img9_1.png)
 
 - Para poder acceder a ella tendremos que añadirla en nuestro ficherto /etc/hosts, y abrir posteriormente los puertos de nuestro router, pera ya lo veremos más adelante. Lógicamente, esto último no lo podemos hacer en nuestro centro, tendremos que limitarlo a hacerlo en su caso en nuestra casa.
- `
-![](images/hard12.png)
 
-Podemos comprobar que funciona todo con el siguiente comando:
+![](Images/img10.png)
 
-~~~
-nslookup http://ppsiesvalledeljerteplasencia.duckdns.org/
-~~~
+![](Images/img10_1.png)
 
 Una vez registrado el dominio, procedemos con la obtención del certificado:
 
-**📥 Paso 2: Instalar Certbot**
+__Paso 2: Instalar Certbot__
 
-~~~
+```
 apt update
 apt install certbot python3-certbot-apache
-~~~
+```
 
+![](Images/img11.png)
 
-**🔑 Paso 3: Obtener el certificado SSL**
+![](Images/img11_1.png)
 
-~~~
+__Paso 3: Obtener el certificado SSL__
+
+```
 certbot --apache
-~~~
+```
+
+![](Images/img12.png)
+
 Durante el proceso:
 
 - Se verificará que el dominio apunte correctamente al servidor.
@@ -422,25 +420,27 @@ Durante el proceso:
 - Se te preguntará si deseas redirigir automáticamente de HTTP a HTTPS (recomendado).
 
 
-**🌐 Paso 4: Verificar HTTPS**
+__Paso 4: Verificar HTTPS__
 
 Accede a tu sitio en el navegador usando: `https://tudominio.com`
 
 Deberías ver el candado que indica que la conexión es segura.
 
+![](Images/img13.png)
 
-**🔄 Paso 5: Renovación automática del certificado**
+__Paso 5: Renovación automática del certificado__
 
 Let's Encrypt emite certificados válidos por 90 días. Certbot configura automáticamente la renovación.
 
 Puedes probarla con:
 
-~~~
+```
 sudo certbot renew --dry-run
-~~~
+```
 
 
-**🛠 Paso 6: Revisar configuración SSL (opcional)**
+
+__Paso 6: Revisar configuración SSL (opcional)__
 
 Los archivos se encuentran en:
 
@@ -448,16 +448,17 @@ Los archivos se encuentran en:
 
 Fragmento típico de configuración SSL:
 
-~~~
+```
 SSLEngine on
 SSLCertificateFile /etc/letsencrypt/live/tu-dominio/fullchain.pem
 SSLCertificateKeyFile /etc/letsencrypt/live/tu-dominio/privkey.pem
-~~~
+```
 
+![](Images/img14.png)
 
 ---
 
-## 7. 🔒  Forzar HTTPS en Apache2 (default.conf y .htaccess)
+## 7. Forzar HTTPS en Apache2 (default.conf y .htaccess)
 
 ### 1. Configuración en `default.conf` (archivo de configuración de Apache)
 
@@ -465,18 +466,18 @@ Edita tu archivo de configuración del sitio (por ejemplo `/etc/apache2/sites-av
 
 Tienes dos opciones:
 
-**Opción a) Usar `Redirect` directo**
+__Opción a) Usar `Redirect` directo__
 
-~~~
+```
 <VirtualHost *:80>
-    ServerName pps.edu
-    ServerAlias www.pps.edu
+    ServerName pps.ceceti
+    ServerAlias www.pps.ceceti
 
-    Redirect permanent / https://pps.edu/
+    Redirect permanent / https://pps.ceceti/
 </VirtualHost>
 
 <VirtualHost *:443>
-    ServerName pps.edu
+    ServerName pps.ceceti
     DocumentRoot /var/www/html
 
     SSLEngine on
@@ -486,15 +487,15 @@ Tienes dos opciones:
 
     # Configuración adicional para HTTPS
 </VirtualHost>
-~~~
+```
 
 
-** Opción b) Usar `RewriteEngine` para mayor flexibilidad**
+__ Opción b) Usar `RewriteEngine` para mayor flexibilidad__
 
 ```apache
 <VirtualHost *:80>
-    ServerName pps.edu
-    ServerAlias www.pps.edu
+    ServerName pps.ceceti
+    ServerAlias www.pps.ceceti
 
     RewriteEngine On
     RewriteCond %{HTTPS} off
@@ -502,26 +503,29 @@ Tienes dos opciones:
 </VirtualHost>
 ```
 
+![](Images/img15.png)
+![](Images/img16.png)
+
 
 ### 2. Configuración en `.htaccess`
 
 Si prefieres hacerlo desde un `.htaccess` en la raíz del proyecto:
 
-~~~
+```
 RewriteEngine On
 
 # Si no está usando HTTPS
 RewriteCond %{HTTPS} !=on
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-~~~
+```
 
-> 🔥 **Recuerda:** Para que `.htaccess` funcione correctamente, en tu `default.conf` debes tener habilitado `AllowOverride All`:
+> __Recuerda:__ Para que `.htaccess` funcione correctamente, en tu `default.conf` debes tener habilitado `AllowOverride All`:
 
-~~~
+```
 <Directory /var/www/html>
     AllowOverride All
 </Directory>
-~~~
+```
 
 También asegúrate que el módulo `mod_rewrite` esté habilitado:
 
@@ -530,9 +534,11 @@ a2enmod rewrite
 service apache2 reload
 ```
 
+![](Images/img17.png)
+
 ---
 
-## 8. 🛡️  Implementación y Evaluación de Content Security Policy (CSP)
+## 8. Implementación y Evaluación de Content Security Policy (CSP)
 
 Puedes ver este contenido con más profundidad en el siguiente repositorio: <https://github.com/jmmedinac03vjp/PPS-Unidad3Actividad20-CSP>
 
@@ -546,12 +552,14 @@ una aplicación web para evitar ataques como XSS.
     Header always set Content-Security-Policy "default-src 'self'; script-src 'self'  object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
 </IfModule>
 ```
+
 Por ejemplo, de esta forma solo permitimos la carga de contenidos de nuestro sitio, ningúno de servidores externos.
 
+![](Images/img18.png)
 
 ---
 
-## 9. 🛡️  Nota de seguridad extra: HSTS (opcional pero recomendado)
+## 9. Nota de seguridad extra: HSTS (opcional pero recomendado)
 
 Puedes ver este contenido con más profundidad en el siguiente repositorio: <https://github.com/jmmedinac03vjp/PPS-Unidad3Actividad21-HSTS>
 
@@ -563,8 +571,10 @@ Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains
 
 > Esto obliga a los navegadores a recordar usar siempre HTTPS, protegiendo de ataques de tipo *downgrade*.
 
-**Importante**: Asegúrate de que todo tu sitio funcione bien en HTTPS antes de aplicar HSTS.
+__Importante__: Asegúrate de que todo tu sitio funcione bien en HTTPS antes de aplicar HSTS.
 
+![](Images/img20.png)
+![](Images/img20_1.png)
 
 ---
 
@@ -572,7 +582,7 @@ Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains
 
 En este apartado vermeos la configuración segura en servidores y aplicaciones web
 
-**Objetivo**: Detectar configuraciones inseguras en un servidor web y corregirlas
+__Objetivo__: Detectar configuraciones inseguras en un servidor web y corregirlas
 
 
 ### ¿Qué es Security Misconfiguration?
@@ -585,15 +595,13 @@ Security Misconfiguration ocurre cuando un servidor, base de datos o aplicación
 Para comprobar si hay exposición de información sensible en nuestro servidor ejecutamos:
 
 ```bash
-curl -I http://pps.edu
+curl -I http://pps.ceceti
 ```
 
-![](images/hard15.png)
-
-Si la respuesta contiene:`Server: Apache/2.4.41 (Ubuntu)` y/o `X-Powered-By: PHP/7.4.3` el sistema nos está ofreciendo información sobre las versiones de Apache y PHP.
+![](Images/img21.png)
 
 
-Los atacantes pueden aprovechar vulnerabilidades conocidas en versiones específicas de software.
+Si la respuesta contiene:`Server: Apache/2.4.41 (Ubuntu)` y/o `X-Powered-By: PHP/7.4.3` el sistema nos está ofreciendo información sobre las versiones de Apache y PHP, por lo que los atacantes pueden aprovechar vulnerabilidades conocidas en versiones específicas de software.
 
 
 ### Corregir la configuración del servidor Apache
@@ -604,7 +612,7 @@ Las directivas pueden estar en distintos archivos según la distribución y la c
 grep -Ri "ServerSignature\|ServerTokens" /etc/apache2/
 ```
 
-![](images/hard16.png)
+![](Images/img22.png)
 
 En los sistemas que usan `Debian/Ubuntu` como base, las directivas `ServerSignature` y `ServerTokens` se configuran en el archivo `/etc/apache2/conf-available/security.conf`.
 
@@ -615,21 +623,23 @@ archivo ` /etc/apache2/conf-available/security.conf`
 ServerSignature Off
 ServerTokens Prod
 ```
-![](images/hard17.png)
 
->
-> La directiva `ServerTokens` en `Apache` controla cuánta información sobre el servidor se incluye en las cabeceras de respuesta HTTP.
->
-> ![](images/hard18.png)
+![](Images/img23.png)
 
->
->La directiva ServerSignature controla si Apache muestra información sobre el servidor en las páginas de error, listados de directorios y otras respuestas generadas automáticamente.
-> Opción						 Efecto
-> **On**	 Muestra información completa sobre Apache en páginas de error y listados de directorios. (Inseguro)
->
-> **Off**	 No muestra ninguna firma del servidor en las páginas de error y directorios. (Recomendado)
->
-> **EMail**	 Similar a On, pero agrega la dirección de ServerAdmin en los mensajes de error. (No recomendado por seguridad)
+
+La directiva `ServerTokens` en `Apache` controla cuánta información sobre el servidor se incluye en las cabeceras de respuesta HTTP.
+
+
+
+![](Images/img24.png)
+
+La directiva ServerSignature controla si Apache muestra información sobre el servidor en las páginas de error, listados de directorios y otras respuestas generadas automáticamente.
+Opción						 Efecto
+ __On__	 					Muestra información completa sobre Apache en páginas de error y listados de directorios. (Inseguro)
+
+__Off__	 					No muestra ninguna firma del servidor en las páginas de error y directorios. (Recomendado)
+
+__EMail__					Similar a On, pero agrega la dirección de ServerAdmin en los mensajes de error. (No recomendado por seguridad)
 
 
 ### Ocultar la versión de PHP (php.ini)
@@ -641,7 +651,7 @@ php --ini | grep "Loaded Configuration File"
 
 La salida mostrará la ruta, por ejemplo: `Loaded Configuration File: /etc/php/8.2/apache2/php.ini`
 
-![](images/hard19.png)
+![](Images/img25.png)
 
 Si se tienen varias versiones de PHP, verificar cuál está en uso con:
 
@@ -660,9 +670,14 @@ nano /usr/local/etc/php/php.ini
 
 - Hemos cambiado `expose_php = On` a `expose_php = Off` y reiniciado los servicios:
 
+![](Images/img26.png)
+
 ```bash 
 sudo systemctl restart apache2
 ```
+
+![](Images/img27.png)
+
 
 Además, si se usa `PHP-FPM`, también reiniciarlo. FPM (FastCGI Process Manager) es una implementación alternativa al PHP FastCGI. FPM es un servidor de aplicaciones PHP que se encarga de interpretar código PHP. Aunque normalmente se utiliza junto a un servidor web (Apache2 o ngnix):
 
@@ -673,18 +688,19 @@ php-fpm status
 ```
 Si está instalado te mostrará su estado, si no lo está, mostrará el mensaje de "Comando no encontrado".
 
-![](images/hard20.png)
 
 ```bash
 service php8.2-fpm restart
 ```
 
-> Con estas modificaciones, la respuesta del servidor a `curl -I http://pps.edu` ya no debería mostrar la versión de Apache ni de PHP.
+> Con estas modificaciones, la respuesta del servidor a `curl -I http://pps.ceceti` ya no debería mostrar la versión de Apache ni de PHP.
+
+![](Images/img28.png)
 
 
 ### Otras mitigaciones para Configuración Insegura y Mejores Prácticas
 
-**Deshabilitar listados de directorios**
+__Deshabilitar listados de directorios__
 
 Nos encontramos ante un fallo de seguridad cuando al introducir la ruta a una carpeta del servidor web que no contiene un archivo `index.html`, se nos muestran los archivos presentes en ella. 
 
@@ -708,15 +724,21 @@ Para deshabilitar que se puedan listar los directorios si no hay un index utiliz
     </Directory>
 ```
 
+![](Images/img29.png)
+
+![](Images/img30.png)
+
+![](Images/img31.png)
+
 Dependiendo de donde nos interese podemos aplicar esta configuración en:
 
 - Par todo el servidor: `/etc/apache2/apache2.conf`
 
-![](images/hard21.png)
+
 
 - Para uno o varios sitios virtuales: `/etc/apache2/sites-available/XXXXX.conf`
 
-![](images/hard22.png)
+
 
 - Para uno o varios directorio en configuración "htaccess": `.htaccess`
 
@@ -743,7 +765,7 @@ Después de aplicar esa `Options` si queremos acceder a una carpeta que no conti
 
 
 
-**Revisar permisos en archivos sensibles**
+__Revisar permisos en archivos sensibles__
 
 Por defecto, en el archivo de configuración de `Apache`  tienen permiso de lectura todos los usuarios:
 
@@ -755,9 +777,9 @@ Cambiamos los permisos por quitando los permisos de lectura del grupo `Otros`:
 chmod 640 /etc/apache2/apache2.conf
 ```
 
-**Políticas de Control de Acceso: Autorización:**
+__Políticas de Control de Acceso: Autorización:__
 
-El **control de acceso**, hace referencia a todos los medios que proporcionan una forma de controlar el acceso a cualquier recurso. La directiva `Require` proporciona una variedad de diferentes maneras de permitir o denegar el acceso a los recursos. Además puede ser usada junto con las directivas: `RequireAll`, `RequireAny`, y `RequireNone`, estos requerimientos pueden ser combinados de forma compleja y arbitraria, para cumplir cualquiera que sean tus políticas de acceso.
+El __control de acceso__, hace referencia a todos los medios que proporcionan una forma de controlar el acceso a cualquier recurso. La directiva `Require` proporciona una variedad de diferentes maneras de permitir o denegar el acceso a los recursos. Además puede ser usada junto con las directivas: `RequireAll`, `RequireAny`, y `RequireNone`, estos requerimientos pueden ser combinados de forma compleja y arbitraria, para cumplir cualquiera que sean tus políticas de acceso.
 
 Podemos controlar el acceso a cualquier recurso o conjunto de recurso, por ejemplo usando una directiva `Directory`, con `Requiere` usando algunas de estas opciones:
 
@@ -782,7 +804,7 @@ Se puede usar el operador not para indicar la denegación, por ejemplo: `Require
 Por lo tanto podemos usar esta directiva para restringir el acceso a nuestras páginas.
 
 
-**Desactivar métodos HTTP inseguros**
+__Desactivar métodos HTTP inseguros__
 
 Para Desactivar métodos HTTP inseguros como `PUT`, `DELETE`, `TRACE`u `OPTIONS` utilizamos la siguiente configuración en Apache:
 
@@ -794,7 +816,9 @@ Para Desactivar métodos HTTP inseguros como `PUT`, `DELETE`, `TRACE`u `OPTIONS`
 </Directory>
 ```
 
-**Configurar cabeceras de seguridad en Apache**
+
+
+__Configurar cabeceras de seguridad en Apache__
 
 Aplicamos diferentes mejoras que nos proporciona el módulo `headers`.
 
@@ -812,7 +836,8 @@ Header always set X-XSS-Protection "1; mode=block"
 Header always set X-Content-Type-Options "nosniff"
 ```
 
-![](images/hard27.png)
+![](Images/img32.png)
+
 
 Las inclusión de las diferentes cabeceras tienen las siguientes consecuencias: 
 
@@ -833,7 +858,7 @@ archivo `/etc/apache2/etc/sites-available/default-ssl.conf`
 ```apache
 <VirtualHost *:80>
 
-    ServerName www.pps.edu
+    ServerName www.pps.ceceti
 
     ServerAdmin webmaster@localhost
     DocumentRoot /var/www/html
@@ -844,7 +869,7 @@ archivo `/etc/apache2/etc/sites-available/default-ssl.conf`
 </VirtualHost>
 
 <VirtualHost *:443>
-    ServerName www.pps.edu
+    ServerName www.pps.ceceti
 
     DocumentRoot /var/www/html
 
@@ -880,13 +905,14 @@ archivo `/etc/apache2/etc/sites-available/default-ssl.conf`
 </VirtualHost>
 ```
 
+![](Images/img33.png)
 
-### 🔐 10. Configuración de `mod_security` con reglas OWASP CRS en Apache
+### 10. Configuración de `mod_security` con reglas OWASP CRS en Apache
 
 Par finalizar vamos a crear un WAF en nuestro servidor Apache.
 
 
-### 🔐  **¿Qué es un WAF?**
+### __¿Qué es un WAF?__
 
 Un WAF (Web Application Firewall) es un firewall especializado que protege aplicaciones web filtrando, monitoreando y bloqueando tráfico HTTP/S malicioso. Actúa como una barrera entre el cliente (usuario) y el servidor web.
 
@@ -940,7 +966,7 @@ Accede a la página <http://localhost/LFI/lfi.php?file=../../../../etc/passwd>
 
 
 
-🛡 **¿Cómo funciona?**
+🛡 __¿Cómo funciona?__
 
 El WAF inspecciona cada solicitud y respuesta HTTP:
 
@@ -953,7 +979,7 @@ Puede trabajar en distintos modos:
 - Prevención (activo): bloquea el tráfico sospechoso.
 
 
-✅ **Ventajas**
+__Ventajas__
 
 - Protege sin modificar el código de la aplicación.
 
@@ -974,7 +1000,7 @@ Para asegurarnos que no tenemos ninguna seguridad implementada de las realizadas
 
 
 
-### ✅ Instalar `mod_security`
+### Instalar `mod_security`
 
 Para instalar la libreria de Apache `ModSecurity` ejecuta en línea de comandos:
 
@@ -986,7 +1012,7 @@ apt install libapache2-mod-security2
 Esto instala `mod_security` y lo habilita como módulo de Apache.
 
 
-### ✅  Activar y verificar `mod_security`
+### Activar y verificar `mod_security`
 
 Copiamos el archivo de configuración recomendado
 
@@ -1004,7 +1030,7 @@ SecRuleEngine DetectionOnly
 ![](images/hard31.png)
 
 
-> 🔁 Más adelante puedes cambiar a `On` para bloquear tráfico malicioso real.
+> Más adelante puedes cambiar a `On` para bloquear tráfico malicioso real.
 
 Guarda y recarga el servicio  Apache:
 
@@ -1023,7 +1049,7 @@ Nos debe de dar como resultado: ` security2_module (shared)`
 
 ---
 
-### ✅  Descargar OWASP ModSecurity Core Rule Set (CRS)
+### Descargar OWASP ModSecurity Core Rule Set (CRS)
 
 Para incorporar las reglas CRS de OWASP a `mod_security` clonamos el repositorio y copiamos el archivo de configuración.
 ```bash
@@ -1036,7 +1062,7 @@ cp crs-setup.conf.example crs-setup.conf
 
 ---
 
-### ✅  Incluir las reglas OWASP en la configuración
+### Incluir las reglas OWASP en la configuración
 
 Al instalar modsecurity-crs, Apache puede autoincluir CRS desde:
 
@@ -1067,7 +1093,7 @@ IncludeOptional /etc/modsecurity/coreruleset/crs-setup.conf
 IncludeOptional /etc/modsecurity/coreruleset/rules/*.conf
 ```
 
-Para probar, es conveniente que el resto de los sitios virtuales estén deshabilitados. Si has estado haciendo pruebas con el sitio `pps.edu` u otro, es conveniente que lo revises y deshabilites y habilita `000-default`.
+Para probar, es conveniente que el resto de los sitios virtuales estén deshabilitados. Si has estado haciendo pruebas con el sitio `pps.ceceti` u otro, es conveniente que lo revises y deshabilites y habilita `000-default`.
 
 ```bash
 a2dissite default-ssl
@@ -1084,7 +1110,7 @@ Si te da error de duplicación de reglas, puedes comentar los `includeOptional` 
 
 ---
 
-### ✅  Activar bloqueo real (opcional, tras pruebas)
+###  Activar bloqueo real (opcional, tras pruebas)
 
 Una vez que hayas probado que no rompe funcionalidades legítimas de tu sitio:
 
@@ -1098,9 +1124,9 @@ Cambia:
 SecRuleEngine On
 ```
 
-Esto hará que el WAF **bloquee solicitudes peligrosas automáticamente**.
+Esto hará que el WAF __bloquee solicitudes peligrosas automáticamente__.
 
-### ✅  Probar el WAF
+### Probar el WAF
 
 Prueba reglas usando cadenas típicas de ataques en la URL:
 
@@ -1108,7 +1134,7 @@ Prueba reglas usando cadenas típicas de ataques en la URL:
 http://localhost/LFI/lfi.php?file=../../../../etc/passwd
 ```
 
-El acceso debería ser bloqueado con un **Forbidden** (si está en modo "On") o logueado (si está en "DetectionOnly").
+El acceso debería ser bloqueado con un __Forbidden__ (si está en modo "On") o logueado (si está en "DetectionOnly").
 
 ---
 
@@ -1117,7 +1143,7 @@ El acceso debería ser bloqueado con un **Forbidden** (si está en modo "On") o 
 
 ---
 
-### ✅  Ver logs de ModSecurity
+### Ver logs de ModSecurity
 
 ModSecurity escribe sus logs `/var/log/apache2/modsec_autdit.log`.
 
@@ -1145,13 +1171,12 @@ SecRuleRemoveById 942100
 Coloca esto en tu configuración personalizada, después de cargar el CRS.
 
 ---
-
-## ⚠️  
+ 
 ## 11.IMPORTANTE SOLUCION  de problemas que puedan surgir.
 
 Como estamos utilizando un servidor con docker-compose es importante:
 
-**Para Parar el Escenario LAMP**
+__Para Parar el Escenario LAMP__
 
 - Utilizamos siempre:
 
@@ -1174,7 +1199,7 @@ No obstante, recordemos que dentro de la carpeta del docker compose, tenemos `vo
 Por lo tanto, después de eliminar el escenario, incluso si utilizamos `-v` esos archivos seguirán estando en nuestro sistema, por lo tanto ¡¡¡OJO¡¡¡ por que nos pueden dar problemas al crear de nuevo el escenario.
 
 
-**Para Iniciar el Escenario LAMP**
+__Para Iniciar el Escenario LAMP__
 
 - Utilizamos siempre:
 
@@ -1182,7 +1207,7 @@ Por lo tanto, después de eliminar el escenario, incluso si utilizamos `-v` esos
 docker-compose stop
 ```
 
-** Para eliminar completamente el escenario y comenzar de nuevo eliminando las configuraciones anteriores**
+__ Para eliminar completamente el escenario y comenzar de nuevo eliminando las configuraciones anteriores__
 
 - Utilizamos :
 
@@ -1201,7 +1226,7 @@ Recordemos que dentro podemos tener configuraciones en los `volúmenes bind moun
 
 	- `ssl`: carpeta con certificados `SSL` de Apache. Es posible que tengamos que eliminarlos.
 
-	- `vhosts` **IMPORTANTE**: aquí se guarda la configuración de los sitios virtuales de apache `/etc/apache2/sites-available`. Por lo tanto cualquier archivo de configuración que esté presente aquí el servidor va a intentar arrancarlo y si no tiene algún módulo activado es posible que nos de error.
+	- `vhosts` __IMPORTANTE__: aquí se guarda la configuración de los sitios virtuales de apache `/etc/apache2/sites-available`. Por lo tanto cualquier archivo de configuración que esté presente aquí el servidor va a intentar arrancarlo y si no tiene algún módulo activado es posible que nos de error.
  
 - `logs`: logs de apache. En principio esta carpeta no es problemática.
 
@@ -1211,15 +1236,15 @@ Recordemos que dentro podemos tener configuraciones en los `volúmenes bind moun
 
 Por lo tanto si hemos eliminado completamente el escenario, cuando lo arranquemos de nuevo, hay que comprobar que todos los servicios están levantados y especialmente que sitios están activados por ejemplo con `a2ensite` y en su caso desactivar los sitios no deseados.
 
-**¡¡¡OJO¡¡¡** que el fichero que sí se elimina es `/etc/hosts` por lo que tenemos que volver a poner allí la línea
+__¡¡¡OJO¡¡¡__ que el fichero que sí se elimina es `/etc/hosts` por lo que tenemos que volver a poner allí la línea
 
 archivo `/etc/hosts`
 ```/etc/hosts
-127.0.0.1       pps.edu www.pps.edu
+127.0.0.1       pps.ceceti www.pps.ceceti
 
 ```
 
-**EJEMPLO DE PROBLEMA:** Después de eliminar el escenario multicontenedor no arranca el servidor PHP.
+__EJEMPLO DE PROBLEMA:__ Después de eliminar el escenario multicontenedor no arranca el servidor PHP.
 
 Si hemos eliminado el escenario multicontenedor y después de levantarlo no podemos acceder al servidor apache con: `docker exec -it lamp-php83 /bin/bash`, es posible por que haya un problema en la configuración. Por ejemplo en este caso:
 
@@ -1231,7 +1256,7 @@ Si hemos eliminado el escenario multicontenedor y después de levantarlo no pode
 
 Podemos ver el estado de los contenedores con `docker-compose ps`.
 
- **Que hacer en este caso** 
+ __Que hacer en este caso__ 
 
 Podemos mover esos archivos de configuración a otro sitio, levantar el escenario o apache de nuevo y volver a restaurar el archivo a su sitio después de levantar el módulo SSL y si queremos desactivamos el sitio por defecto `a2dissite 000-default.conf`.
 
