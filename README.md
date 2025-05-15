@@ -4,79 +4,40 @@ HTTPS, Hsts, Hardening de servidor web.
 
 Tenemos como objetivo:
 
->
-> - Conocer cómo configurar un servidor Apache.
-> 
-> - Conocer el funcionamiento de HTTP y HTTPS.
->
-> - Crear certificados en nuestro servidor.
->
-> - Saber configurar nuestro servidor para utilizar HTTPS.
->
-> - Conocer HTST.
->
-> - Utilizar configuracion segura en servidores y aplicaciones web.
->
-> - Conocer los Firewall de aplicaciones (WAF)
+
+- Conocer cómo configurar un servidor Apache.
+
+- Conocer el funcionamiento de HTTP y HTTPS.
+
+- Crear certificados en nuestro servidor.
+
+- Saber configurar nuestro servidor para utilizar HTTPS.
+
+- Conocer HTST.
+
+- Utilizar configuracion segura en servidores y aplicaciones web.
+
+- Conocer los Firewall de aplicaciones (WAF)
 
 
-# ACTIVIDADES A REALIZAR
----
-> Lee detenidamente el siguiente documento [para conocer la configuración básica de Apache ](./files/1-Configuracion-Basic-Apache.pdf)
->
-> Lee detenidamente el siguiente documento [para conocer las bases del protocolo HTTP ](./files/2-Protocolo-HTTP.pdf)
->
-> Lee detenidamente el siguiente [documento para conocer cómo podemos securizar nuestro servidor web ](./files/3-Hardening-Servidor.pdf)
->
-> En la [carpeta](files) puedes encontrar 3 documentos sobre:
->
-> - Protocolo http
->
-> - Configuración básica de Apache
->
-> - Hardening de Servidor Apache   
-
-Vamos realizando operaciones:
-
----
-
-## Iniciar entorno de pruebas
-
--Situáte en la carpeta de del entorno de pruebas de nuestro servidor LAMP e inicia el escenario docker-compose
-
-~~~
-docker-compose up -d
-~~~
-
-Para asegurarnos que no tenemos ninguna seguridad implementada descarga tus archivos de configuración:
-
-- Archivo de configuración de `Apache`[/etc/apache2/apache2.conf](files/apache2.conf.minimo)
-
-- Archivo de configuración de `PHP`. Nosotros al estar utilizando un escenario multicontenedor lo tenemos en [/usr/local/etc/php/php.ini](files/php.ini).
-
-- Archivo de configuración del sitio virtual `Apache`. [/etc/apache2/sites-available/000-default.conf.](files/000-default.conf)
-
-
-En el [último punto de esta sección](#IMPORTANTE-Solucion-problemas-que-puedan-surgir.) , puedes encontrar la solución a problemas que te pueden surgir durante la realización del ejercicio, relacionado con los cambios en las configuraciones, por lo que puedes echarle un ojo antes de empezar.
-
----
+# ACTIVIDADES
 
 ## 1. Instalación de Apache
 
 Cómo estamos utilizando un escenario docker-compose, para acceder a nuestra máquina tendremos que ejecutar:
 
-~~~
+```
 docker exec -it lamp-php83 /bin/bash
-~~~
+```
 
 Nuestro contenedor que contiene el servicio web, como ves se llama lamp-php83. Si la carpeta donde tienes el escenario tiene otro nombre diferente de lamp, tendrás que cambiar el nombre.
 
 En nuestro servidor ya tenemos instalado Apache, no obstante en cualquier máquina Linux, podemos instalar un servidor Apache, instalando el paquete `apache2`.
 
-~~~
+```
 apt update
 apt install apache2
-~~~
+```
 
 Si no estás utilizando el entorno de pruebas sino otra máquina no estás con usuario `root`es posible que tengas que poner delante de los comandos `sudo`.
 
